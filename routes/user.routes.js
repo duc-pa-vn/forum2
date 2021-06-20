@@ -6,9 +6,7 @@ Router.get('/login', (req,res) => {
     res.render('login');
 });
 
-Router.post('/login', (req, res) => {
-
-});
+Router.post('/login', userCtrl.login);
 
 Router.post('/register', userCtrl.register);
 

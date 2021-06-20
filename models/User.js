@@ -15,12 +15,13 @@ const User = db.define('User',{
         type: DataTypes.STRING,     
     },
     create_at:{
-        type: DataTypes.DATE
+        type: DataTypes.DATE,
     }
 },{
     timestamps:true,
     createdAt: 'create_at',
-    updatedAt:false
+    updatedAt: false,
+    tableName: 'User'
 });
 
 module.exports = User;
