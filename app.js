@@ -5,10 +5,11 @@ const { constants } = require('buffer');
 const db = require('./config/database');
 const app = express();
 const userRouters = require('./routes/user.routes');
-const port = 6969;
+require('dotenv').config();
+const port = process.env.PORT || 6969;
 
 db.authenticate().then(() => console.log('ok')).catch(err => console.log(err));
-
+app.use(bodyParser.json());
 app.set('view engine', 'pug')
 app.set('views','./views');
 
