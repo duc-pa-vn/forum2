@@ -14,6 +14,9 @@ const User = db.define('User',{
     nickname:{
         type: DataTypes.STRING,     
     },
+    active:{
+        type: DataTypes.BOOLEAN,
+    },
     create_at:{
         type: DataTypes.DATE,
     }

@@ -1,6 +1,8 @@
 const User = require('../models/User');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const nodemailer = require('nodemailer');
+require('dotenv').config();
 
 const register = async (req, res, next) => {
     // console.log(req.body.password);
@@ -11,12 +13,15 @@ const register = async (req, res, next) => {
         email: req.body.email,
         hash_password,
         nickname: req.body.nickname,
-
+        active: false
     }
     User.create(user)
-    .then(user => res.json({
-        mess: 'add successfully'
-    }))
+    .then(user => {
+        getVerifyEmail(user.nickname,  user.email);
+        res.json({
+            mess: 'add successfully'
+        })
+    })
     .catch(err => {
         console.log(err);
         res.json({
@@ -41,10 +46,17 @@ const login = (req, res) => {
                     })
                 }
                 if(suc){
-                    let token = jwt.sign({nickname}, process.env.TOKEN, {expiresIn: '24h'});
-                    res.json({
-                        token
-                    })
+                    if(user.active === false){
+                        getVerifyEmail(user.nickname, user.email);
+                        res.json({
+                            mess: 'An email sent. Active your account'
+                        })
+                    }else{
+                        let token = jwt.sign({nickname}, process.env.LOGIN_TOKEN, {expiresIn: '24h'});
+                        res.json({
+                            token
+                        })
+                    }   
                 }
                 else{
                     res.json({
@@ -65,7 +77,55 @@ const login = (req, res) => {
         })
     })
 }
+
+const verifyEmail = (req, res) => {
+    let token = req.params.token;
+    jwt.verify(token, process.env.SIGN_UP_TOKEN, (err, user) => {
+        if(err) console.log(err);
+        else{
+            User.update({active: true},{
+                where: {
+                    nickname: user.nickname
+                }
+            }).then(() => {
+                res.send('ok')
+            }).catch(err => {
+                res.send(err);
+            })
+        } 
+    });}
+
+function getVerifyEmail(nickname, email) {
+    let token = jwt.sign({nickname}, process.env.SIGN_UP_TOKEN, {expiresIn: '24h'});
+    let transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: process.env.EMAIL , // TODO: your gmail account
+            pass: process.env.EPW  // TODO: your gmail password
+        }
+    });
+    const html = `<p>click this link to confirm your email:</p><a href="http://localhost:6969/user/verify/${token}">click here</a>`;
+    // Step 2
+    let mailOptions = {
+        from: 'dauxanhmaunau@gmail.com', // TODO: email sender
+        to: email, // TODO: email receiver
+        subject: 'Nodemailer - Test',
+        html
+        // text: `click this link to confirm: localhost:6969/user/verify/${token}`
+    };
+    
+    // Step 3
+    transporter.sendMail(mailOptions, (err, data) => {
+        if (err) {
+            return console.log(err);
+        }
+        return console.log('Email sent!!!');
+    });
+}
+
 module.exports = {
     register,
-    login
+    login,
+    verifyEmail,
+    getVerifyEmail
 }
