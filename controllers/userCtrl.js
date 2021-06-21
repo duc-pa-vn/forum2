@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const Token_tb = require('../models/Token');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
@@ -40,7 +41,7 @@ const login = (req, res) => {
         if(user){
             bcrypt.compare(password, user.hash_password, (err, suc) => {
                 if(err){
-                    res.json({
+                    return res.json({
                         mess: 'compare err',
                         err
                     })
@@ -52,10 +53,40 @@ const login = (req, res) => {
                             mess: 'An email sent. Active your account'
                         })
                     }else{
-                        let token = jwt.sign({nickname}, process.env.LOGIN_TOKEN, {expiresIn: '24h'});
+                        // let refresh_token = jwt.sign({nickname}, process.env.REFRESH_TOKEN, {expiresIn: '20h'});
+                        let token = jwt.sign({nickname}, process.env.LOGIN_TOKEN, {expiresIn: '20h'});
                         res.json({
                             token
                         })
+                        // let id_user = user.id;
+                        // let token_item = {
+                        //     id_user,
+                        //     token
+                        // }
+                        // Token_tb.findOne({
+                        //     where: {
+                        //         id_user
+                        //     }
+                        // }).then(user_token => {
+                        //     if(user_token){
+                        //         Token_tb.update({token: refresh_token},{
+                        //             where: {
+                        //                 id_user
+                        //             }
+                        //         })
+                        //     }
+                        //     else{
+                        //         Token_tb.create(token_item)
+                        //         .then(
+                        //             res.json({
+                        //                 token,
+                        //                 refresh_token
+                        //             })
+                        //         ).catch(err => {
+                        //             res.json({err})
+                        //         })
+                        //     }
+                        // })
                     }   
                 }
                 else{
@@ -78,10 +109,39 @@ const login = (req, res) => {
     })
 }
 
+// const logout = (req, res) =>{
+//     let refresh_token = req.body.refresh_token;
+//     jwt.verify(refresh_token, process.env.REFRESH_TOKEN, (err, user) => {
+//         if(err) {
+//             res.json({err})
+//         }
+//         else{
+//             User.findOne({
+//                 where: {
+//                     nickname: user.nickname
+//                 }
+//             }).then(user_item => {
+//                 if(user_item){
+//                     Token_tb.destroy({
+//                         where: {
+//                             id_user: user_item.id
+//                         }
+//                     })
+//                 }
+//                 res.sendStatus(204) 
+//             }).catch(err => {
+//                 res.json({err})
+//             })
+//         }
+//     })
+// }
+
 const verifyEmail = (req, res) => {
     let token = req.params.token;
     jwt.verify(token, process.env.SIGN_UP_TOKEN, (err, user) => {
-        if(err) console.log(err);
+        if(err) {
+            res.json({err})
+        }
         else{
             User.update({active: true},{
                 where: {
@@ -93,10 +153,11 @@ const verifyEmail = (req, res) => {
                 res.send(err);
             })
         } 
-    });}
+    });
+}
 
 function getVerifyEmail(nickname, email) {
-    let token = jwt.sign({nickname}, process.env.SIGN_UP_TOKEN, {expiresIn: '24h'});
+    let token = jwt.sign({nickname}, process.env.SIGN_UP_TOKEN, {expiresIn: '17m'});
     let transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {

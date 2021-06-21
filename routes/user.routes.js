@@ -12,4 +12,5 @@ Router.post('/register', userCtrl.register);
 
 Router.get('/verify/:token', userCtrl.verifyEmail);
 
+// Router.get('/logout', userCtrl.logout);
 module.exports = Router;
