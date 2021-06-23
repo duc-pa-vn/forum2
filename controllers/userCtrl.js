@@ -3,6 +3,7 @@ const Token_tb = require('../models/Token');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
+const create_res = require('../common/create_res')
 require('dotenv').config();
 
 const register = async (req, res, next) => {
@@ -19,15 +20,15 @@ const register = async (req, res, next) => {
     User.create(user)
     .then(user => {
         getVerifyEmail(user.nickname,  user.email);
-        res.json({
-            mess: 'add successfully'
-        })
+        let mess = {
+            mess: 'add successfully. An email sent. Verify email to active'
+        }
+        res.send(create_res.sendSuccess(mess))
     })
     .catch(err => {
         console.log(err);
-        res.json({
-        mess: 'add fault'
-    })})
+        res.send(create_res.sendError(500,mess.errorCodes.INTERNAL_SERVER_ERROR,err))
+    })
 }
 
 const login = (req, res) => {
@@ -41,23 +42,24 @@ const login = (req, res) => {
         if(user){
             bcrypt.compare(password, user.hash_password, (err, suc) => {
                 if(err){
-                    return res.json({
-                        mess: 'compare err',
-                        err
-                    })
+                    console.log(err)
+                    return res.send(create_res.sendError())
                 }
                 if(suc){
                     if(user.active === false){
                         getVerifyEmail(user.nickname, user.email);
-                        res.json({
-                            mess: 'An email sent. Active your account'
-                        })
+                        let mess = {
+                            mess: "An email sent. Active your account"
+                        }
+                        // mess = JSON.stringify(mess);
+                        res.send(create_res.sendSuccess(mess));
                     }else{
                         // let refresh_token = jwt.sign({nickname}, process.env.REFRESH_TOKEN, {expiresIn: '20h'});
-                        let token = jwt.sign({nickname}, process.env.LOGIN_TOKEN, {expiresIn: '20h'});
-                        res.json({
+                        let token = jwt.sign({nickname}, process.env.LOGIN_TOKEN, {expiresIn: '17h'});
+                        token = {
                             token
-                        })
+                        }
+                        res.send(create_res.sendSuccess(token))
                         // let id_user = user.id;
                         // let token_item = {
                         //     id_user,
@@ -90,22 +92,22 @@ const login = (req, res) => {
                     }   
                 }
                 else{
-                    res.json({
-                        mess: 'wrong password'
-                    })
+                    let mess = {
+                        mess: "wrong password"
+                    }
+                    res.send(create_res.sendSuccess(mess));
                 }
             })
         }
         else{
-            res.json({
+            let mess = {
                 mess: 'nickname doesn\'t exist'
-            })
+            }
+            res.send(create_res.sendSuccess(mess.toJSON()));
         }
     }).catch(err => {
-        res.json({
-            mess: 'find err',
-            err
-        })
+        console.log(err)
+        res.send(create_res.sendError())
     })
 }
 
@@ -140,7 +142,8 @@ const verifyEmail = (req, res) => {
     let token = req.params.token;
     jwt.verify(token, process.env.SIGN_UP_TOKEN, (err, user) => {
         if(err) {
-            res.json({err})
+            console.log(err)
+            res.send(create_res.sendError())
         }
         else{
             User.update({active: true},{
@@ -148,9 +151,13 @@ const verifyEmail = (req, res) => {
                     nickname: user.nickname
                 }
             }).then(() => {
-                res.send('ok')
+                let mess = {
+                    mess: 'active'
+                }
+                res.send(create_res.sendSuccess(mess))
             }).catch(err => {
-                res.send(err);
+                console.log(err)
+                res.send(create_res.sendError())
             })
         } 
     });
