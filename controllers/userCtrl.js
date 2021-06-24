@@ -103,7 +103,7 @@ const login = (req, res) => {
             let mess = {
                 mess: 'nickname doesn\'t exist'
             }
-            res.send(create_res.sendSuccess(mess.toJSON()));
+            res.send(create_res.sendSuccess(mess));
         }
     }).catch(err => {
         console.log(err)
