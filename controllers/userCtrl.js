@@ -16,11 +16,11 @@ const register = async (req, res, next) => {
         hash_password,
         nickname: req.body.nickname,
         active: false,
-        avatar: req.file.path.split('/').slice(1).join('/')
+        avatar: req.body.key
     }
     User.create(user)
     .then(user => {
-        getVerifyEmail(user.nickname,  user.email);
+        getVerifyEmail(user.nickname,  user.email, "signup");
         let mess = {
             mess: 'add successfully. An email sent. Verify email to active'
         }
@@ -48,7 +48,7 @@ const login = (req, res) => {
                 }
                 if(suc){
                     if(user.active === false){
-                        getVerifyEmail(user.nickname, user.email);
+                        getVerifyEmail(user.nickname, user.email, "signup");
                         let mess = {
                             mess: "An email sent. Active your account"
                         }
@@ -164,8 +164,42 @@ const verifyEmail = (req, res) => {
     });
 }
 
-function getVerifyEmail(nickname, email) {
-    let token = jwt.sign({nickname}, process.env.SIGN_UP_TOKEN, {expiresIn: '17m'});
+const checkRecoverToken = (req, res) => {
+    let token = req.params.token;
+    jwt.verify(token, process.env.RECOVER_TOKEN, (err, user) => {
+        if(err) {
+            console.log(err)
+            res.send(create_res.sendError())
+        }
+        else{
+            User.update({active: true},{
+                where: {
+                    nickname: user.nickname
+                }
+            }).then(() => {
+                let mess = {
+                    mess: 'redirect to recover page'
+                }
+                res.send(create_res.sendSuccess(mess))
+            }).catch(err => {
+                console.log(err)
+                res.send(create_res.sendError())
+            })
+        } 
+    });
+}
+
+function getVerifyEmail(nickname, email, type) {
+    let html;
+    let token;
+    if(type === "signup"){
+        token = jwt.sign({nickname}, process.env.SIGN_UP_TOKEN, {expiresIn: '17m'});
+        html = `<p>click this link to confirm your email:</p><a href="http://localhost:6969/user/verify/${token}">click here</a>`;
+    } 
+    else if( type === "recover"){
+        token = jwt.sign({nickname}, process.env.RECOVER_TOKEN, {expiresIn: '17m'});
+        html = `<p>click this link to change password:</p><a href="http://localhost:6969/user/recover/${token}">click here</a>`;
+    } 
     let transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
@@ -173,7 +207,7 @@ function getVerifyEmail(nickname, email) {
             pass: process.env.EPW  // TODO: your gmail password
         }
     });
-    const html = `<p>click this link to confirm your email:</p><a href="http://localhost:6969/user/verify/${token}">click here</a>`;
+    
     // Step 2
     let mailOptions = {
         from: 'dauxanhmaunau@gmail.com', // TODO: email sender
@@ -192,14 +226,32 @@ function getVerifyEmail(nickname, email) {
     });
 }
 
-const changePassword = (req, res) => {
-
+const forgotPassword = (req, res) => {
+    const nickname = req.body.nickname;
+    User.findOne({
+        where: {
+            nickname
+        }
+    }).then(user => {
+        if(user){
+            getVerifyEmail(user.nickname, user.email, "recover");
+            let mess ={
+                mess: "a link to recover your password sent."
+            }
+            res.send(create_res.sendSuccess(mess))
+        }
+    })
 }
 
+const recoverPassword = (req, res) => {
+    const 
+}
 module.exports = {
     register,
     login,
     verifyEmail,
     getVerifyEmail,
-    changePassword
+    forgotPassword,
+    checkRecoverToken,
+    recoverPassword
 }

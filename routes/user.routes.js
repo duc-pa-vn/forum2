@@ -2,7 +2,7 @@ const express = require('express');
 const Router = express.Router();
 const userCtrl = require('../controllers/userCtrl');
 const multer = require('multer');
-const s3 = require('../common/s3');
+const s3 = require('../middleware/s3');
 var upload = multer({dest: './public/images/avatar/'});
 
 Router.get('/login', (req,res) => {
@@ -15,11 +15,17 @@ Router.get('/register', (req,res) => {
 
 Router.post('/login', userCtrl.login);
 
-// Router.post('/register', upload.single('avatar'), s3.upload, userCtrl.register);
+Router.post('/register', upload.single('avatar'), s3.upload, userCtrl.register);
+
+// Router.post('/register', upload.single('avatar'), userCtrl.register);
 
 Router.get('/verify/:token', userCtrl.verifyEmail);
 
-Router.post('/changePassword',userCtrl.changePassword);
+Router.get('/recover/:token', userCtrl.checkRecoverToken);
+
+Router.post('/forgotPassword', userCtrl.forgotPassword);
+
+Router.post('/recoverPassword', userCtrl.recoverPassword);
 
 // Router.get('/logout', userCtrl.logout);
 
