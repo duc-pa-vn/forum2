@@ -172,19 +172,11 @@ const checkRecoverToken = (req, res) => {
             res.send(create_res.sendError())
         }
         else{
-            User.update({active: true},{
-                where: {
-                    nickname: user.nickname
-                }
-            }).then(() => {
-                let mess = {
-                    mess: 'redirect to recover page'
-                }
-                res.send(create_res.sendSuccess(mess))
-            }).catch(err => {
-                console.log(err)
-                res.send(create_res.sendError())
-            })
+            let mess = {
+                nickname: user.nickname,
+                mess: 'redirect to recover page'
+            }
+            res.send(create_res.sendSuccess(mess))
         } 
     });
 }
@@ -240,12 +232,43 @@ const forgotPassword = (req, res) => {
             }
             res.send(create_res.sendSuccess(mess))
         }
+        else{
+            let mess ={
+                mess: "nickname doesn\'t exist"
+            }
+            res.send(create_res.sendSuccess(mess))
+        }
+    }).catch(err => {
+        console.log(err)
+        res.send(create_res.sendError())
     })
 }
 
-const recoverPassword = (req, res) => {
-    const 
+const recoverPassword = async (req, res) => {
+    try{
+        var hash_password = await bcrypt.hash(req.body.password.toString().trim(), 10);
+        var nickname = req.body.nickname;
+    }
+    catch(err){
+        console.log(err)
+        res.send(create_res.sendError())
+    }
+
+    User.update({hash_password},{
+        where: {
+            nickname
+        }
+    }).then(() => {
+        let mess ={
+            mess: "recover successfully"
+        }
+        res.send(create_res.sendSuccess(mess))
+    }).catch(err => {
+        console.log(err)
+        res.send(create_res.sendError())
+    })
 }
+
 module.exports = {
     register,
     login,

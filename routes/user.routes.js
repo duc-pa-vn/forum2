@@ -3,6 +3,7 @@ const Router = express.Router();
 const userCtrl = require('../controllers/userCtrl');
 const multer = require('multer');
 const s3 = require('../middleware/s3');
+const validate = require('../middleware/validate');
 var upload = multer({dest: './public/images/avatar/'});
 
 Router.get('/login', (req,res) => {
@@ -25,7 +26,7 @@ Router.get('/recover/:token', userCtrl.checkRecoverToken);
 
 Router.post('/forgotPassword', userCtrl.forgotPassword);
 
-Router.post('/recoverPassword', userCtrl.recoverPassword);
+Router.post('/recoverPassword', validate.checkRepeatPassword, userCtrl.recoverPassword);
 
 // Router.get('/logout', userCtrl.logout);
 
