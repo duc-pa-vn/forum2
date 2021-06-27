@@ -6,7 +6,12 @@ const db = require('./config/database');
 const app = express();
 const userRouters = require('./routes/user.routes');
 
+
+app.use(express.static('public'));
+
 require('dotenv').config();
+
+
 const port = process.env.PORT || 6969;
 
 db.authenticate().then(() => console.log('ok')).catch(err => console.log(err));

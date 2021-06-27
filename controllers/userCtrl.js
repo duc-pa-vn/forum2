@@ -15,7 +15,8 @@ const register = async (req, res, next) => {
         email: req.body.email,
         hash_password,
         nickname: req.body.nickname,
-        active: false
+        active: false,
+        avatar: req.file.path.split('/').slice(1).join('/')
     }
     User.create(user)
     .then(user => {
@@ -191,9 +192,14 @@ function getVerifyEmail(nickname, email) {
     });
 }
 
+const changePassword = (req, res) => {
+
+}
+
 module.exports = {
     register,
     login,
     verifyEmail,
-    getVerifyEmail
+    getVerifyEmail,
+    changePassword
 }

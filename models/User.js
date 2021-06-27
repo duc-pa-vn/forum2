@@ -19,6 +19,9 @@ const User = db.define('User',{
     },
     create_at:{
         type: DataTypes.DATE,
+    },
+    avatar: {
+        type: DataTypes.STRING
     }
 },{
     timestamps:true,
