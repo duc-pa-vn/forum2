@@ -16,7 +16,7 @@ Router.get('/register', (req,res) => {
 
 Router.post('/login', userCtrl.login);
 
-Router.post('/register', upload.single('avatar'), s3.upload, userCtrl.register);
+Router.post('/register', userCtrl.register);
 
 // Router.post('/register', upload.single('avatar'), userCtrl.register);
 
