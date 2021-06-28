@@ -16,7 +16,7 @@ const register = async (req, res, next) => {
         hash_password,
         nickname: req.body.nickname,
         active: false,
-        avatar: req.body.key
+        avatar: ""
     }
     User.create(user)
     .then(user => {
