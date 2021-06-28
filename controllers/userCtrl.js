@@ -56,7 +56,7 @@ const login = (req, res) => {
                         res.send(create_res.sendSuccess(mess));
                     }else{
                         // let refresh_token = jwt.sign({nickname}, process.env.REFRESH_TOKEN, {expiresIn: '20h'});
-                        let token = jwt.sign({nickname}, process.env.LOGIN_TOKEN, {expiresIn: '17h'});
+                        let token = jwt.sign({nickname, avatar: user.avatar}, process.env.LOGIN_TOKEN, {expiresIn: '17h'});
                         token = {
                             token
                         }
