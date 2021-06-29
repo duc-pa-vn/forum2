@@ -4,6 +4,9 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const create_res = require('../common/create_res')
+const s3 = require('../common/s3')
+const uploadS = require('../services/upload')
+
 require('dotenv').config();
 
 const register = async (req, res, next) => {
@@ -16,7 +19,7 @@ const register = async (req, res, next) => {
         hash_password,
         nickname: req.body.nickname,
         active: false,
-        avatar: ""
+        avatar: null
     }
     User.create(user)
     .then(user => {
@@ -28,7 +31,7 @@ const register = async (req, res, next) => {
     })
     .catch(err => {
         console.log(err);
-        res.send(create_res.sendError(500,mess.errorCodes.INTERNAL_SERVER_ERROR,err))
+        res.send(create_res.sendError())
     })
 }
 
@@ -61,35 +64,6 @@ const login = (req, res) => {
                             token
                         }
                         res.send(create_res.sendSuccess(token))
-                        // let id_user = user.id;
-                        // let token_item = {
-                        //     id_user,
-                        //     token
-                        // }
-                        // Token_tb.findOne({
-                        //     where: {
-                        //         id_user
-                        //     }
-                        // }).then(user_token => {
-                        //     if(user_token){
-                        //         Token_tb.update({token: refresh_token},{
-                        //             where: {
-                        //                 id_user
-                        //             }
-                        //         })
-                        //     }
-                        //     else{
-                        //         Token_tb.create(token_item)
-                        //         .then(
-                        //             res.json({
-                        //                 token,
-                        //                 refresh_token
-                        //             })
-                        //         ).catch(err => {
-                        //             res.json({err})
-                        //         })
-                        //     }
-                        // })
                     }   
                 }
                 else{
@@ -111,33 +85,6 @@ const login = (req, res) => {
         res.send(create_res.sendError())
     })
 }
-
-// const logout = (req, res) =>{
-//     let refresh_token = req.body.refresh_token;
-//     jwt.verify(refresh_token, process.env.REFRESH_TOKEN, (err, user) => {
-//         if(err) {
-//             res.json({err})
-//         }
-//         else{
-//             User.findOne({
-//                 where: {
-//                     nickname: user.nickname
-//                 }
-//             }).then(user_item => {
-//                 if(user_item){
-//                     Token_tb.destroy({
-//                         where: {
-//                             id_user: user_item.id
-//                         }
-//                     })
-//                 }
-//                 res.sendStatus(204) 
-//             }).catch(err => {
-//                 res.json({err})
-//             })
-//         }
-//     })
-// }
 
 const verifyEmail = (req, res) => {
     let token = req.params.token;
@@ -269,6 +216,36 @@ const recoverPassword = async (req, res) => {
     })
 }
 
+const changeAvatar = async (req, res) => {
+    try{
+        let nameFile = await uploadS.uploadImage(req, res, 'avatar');
+        if (nameFile) {
+            const file = req.file;
+            console.log(file);
+            const result = await s3.uploadFile(file);
+            console.log(result);
+            let avatar = result.key;
+            let nickname = req.body.nickname;
+            User.update({avatar},{
+                where: {
+                    nickname
+                }
+            })
+            let mess = {
+                mess: 'avatar was updated'
+            }
+            res.send(create_res.sendSuccess(mess))
+        }
+        else{
+            res.send(create_res.sendError())
+        }
+    }
+    catch(err){
+        console.log(err);
+        return;
+    }
+}
+
 module.exports = {
     register,
     login,
@@ -276,5 +253,6 @@ module.exports = {
     getVerifyEmail,
     forgotPassword,
     checkRecoverToken,
-    recoverPassword
+    recoverPassword,
+    changeAvatar
 }
