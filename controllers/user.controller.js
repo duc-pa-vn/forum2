@@ -1,5 +1,5 @@
-const User = require('../models/User');
-const Token_tb = require('../models/Token');
+const User = require('../models/User.model');
+const Token_tb = require('../models/Token.model');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
@@ -24,10 +24,10 @@ const register = async (req, res, next) => {
     User.create(user)
     .then(user => {
         getVerifyEmail(user.nickname,  user.email, "signup");
-        let mess = {
-            mess: 'add successfully. An email sent. Verify email to active'
+        let message = {
+            message: 'add successfully. An email sent. Verify email to active'
         }
-        res.send(create_res.sendSuccess(mess))
+        res.send(create_res.sendSuccess(message))
     })
     .catch(err => {
         console.log(err);
@@ -52,11 +52,11 @@ const login = (req, res) => {
                 if(suc){
                     if(user.active === false){
                         getVerifyEmail(user.nickname, user.email, "signup");
-                        let mess = {
-                            mess: "An email sent. Active your account"
+                        let message = {
+                            message: "An email sent. Active your account"
                         }
-                        // mess = JSON.stringify(mess);
-                        res.send(create_res.sendSuccess(mess));
+                        // message = JSON.stringify(message);
+                        res.send(create_res.sendSuccess(message));
                     }else{
                         // let refresh_token = jwt.sign({nickname}, process.env.REFRESH_TOKEN, {expiresIn: '20h'});
                         let token = jwt.sign({nickname, avatar: user.avatar}, process.env.LOGIN_TOKEN, {expiresIn: '17h'});
@@ -67,18 +67,18 @@ const login = (req, res) => {
                     }   
                 }
                 else{
-                    let mess = {
-                        mess: "wrong password"
+                    let message = {
+                        message: "wrong password"
                     }
-                    res.send(create_res.sendSuccess(mess));
+                    res.send(create_res.sendSuccess(message));
                 }
             })
         }
         else{
-            let mess = {
-                mess: 'nickname doesn\'t exist'
+            let message = {
+                message: 'nickname doesn\'t exist'
             }
-            res.send(create_res.sendSuccess(mess));
+            res.send(create_res.sendSuccess(message));
         }
     }).catch(err => {
         console.log(err)
@@ -99,10 +99,10 @@ const verifyEmail = (req, res) => {
                     nickname: user.nickname
                 }
             }).then(() => {
-                let mess = {
-                    mess: 'active'
+                let message = {
+                    message: 'active'
                 }
-                res.send(create_res.sendSuccess(mess))
+                res.send(create_res.sendSuccess(message))
             }).catch(err => {
                 console.log(err)
                 res.send(create_res.sendError())
@@ -119,11 +119,11 @@ const checkRecoverToken = (req, res) => {
             res.send(create_res.sendError())
         }
         else{
-            let mess = {
+            let message = {
                 nickname: user.nickname,
-                mess: 'redirect to recover page'
+                message: 'redirect to recover page'
             }
-            res.send(create_res.sendSuccess(mess))
+            res.send(create_res.sendSuccess(message))
         } 
     });
 }
@@ -174,16 +174,16 @@ const forgotPassword = (req, res) => {
     }).then(user => {
         if(user){
             getVerifyEmail(user.nickname, user.email, "recover");
-            let mess ={
-                mess: "a link to recover your password sent."
+            let message ={
+                message: "a link to recover your password sent."
             }
-            res.send(create_res.sendSuccess(mess))
+            res.send(create_res.sendSuccess(message))
         }
         else{
-            let mess ={
-                mess: "nickname doesn\'t exist"
+            let message ={
+                message: "nickname doesn\'t exist"
             }
-            res.send(create_res.sendSuccess(mess))
+            res.send(create_res.sendSuccess(message))
         }
     }).catch(err => {
         console.log(err)
@@ -206,10 +206,10 @@ const recoverPassword = async (req, res) => {
             nickname
         }
     }).then(() => {
-        let mess ={
-            mess: "recover successfully"
+        let message ={
+            message: "recover successfully"
         }
-        res.send(create_res.sendSuccess(mess))
+        res.send(create_res.sendSuccess(message))
     }).catch(err => {
         console.log(err)
         res.send(create_res.sendError())
@@ -231,10 +231,10 @@ const changeAvatar = async (req, res) => {
                     nickname
                 }
             })
-            let mess = {
-                mess: 'avatar was updated'
+            let message = {
+                message: 'avatar was updated'
             }
-            res.send(create_res.sendSuccess(mess))
+            res.send(create_res.sendSuccess(message))
         }
         else{
             res.send(create_res.sendError())
