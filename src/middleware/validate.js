@@ -81,7 +81,7 @@ const checkRegister = async (req, res, next ) => {
 	}
 };
 
-const checkRepeatPassword = async (req, res, next) => {
+const checkRepeatPassword = async (req, res, next) => { 
 	const schema = joi.object().keys({
 		password: joi.string().regex(new RegExp('^[a-zA-Z0-9]{8,}$')).required(),
 		repeat_password: joi.ref('password')
