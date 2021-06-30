@@ -1,5 +1,4 @@
-const User = require("../models/User.model");
-const Token_tb = require("../models/Token.model");
+const User = require("../../models/user.model");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
@@ -9,7 +8,7 @@ const uploadS = require("../services/upload");
 
 require("dotenv").config();
 
-const register = async (req, res, next) => {
+const register = async (req, res) => {
 	// console.log(req.body.password);
 	var hash_password = await bcrypt.hash(
 		req.body.password.toString().trim(),
@@ -170,7 +169,7 @@ function getVerifyEmail(nickname, email, type) {
 	};
 
 	// Step 3
-	transporter.sendMail(mailOptions, (err, data) => {
+	transporter.sendMail(mailOptions, (err) => {
 		if (err) {
 			return console.log(err);
 		}
