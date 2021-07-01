@@ -52,7 +52,7 @@ const register = async (req, res) => {
 					let message = {
 						message: "nickname existed"
 					}
-					return res.send(create_res.sendError(500,null,message))
+					return res.send(create_res.sendError(400,null,message.message))
 				}
 			}).catch(err => {
 				console.log(err)
@@ -63,7 +63,7 @@ const register = async (req, res) => {
 			let message = {
 				message: "email existed"
 			}
-			return res.send(create_res.sendError(500,null,message))
+			return res.send(create_res.sendError(400,null,message.message))
 		}
 	}).catch(err => {
 		console.log(err)
@@ -110,14 +110,14 @@ const login = (req, res) => {
 						let message = {
 							message: "wrong password",
 						};
-						res.send(create_res.sendError(500,null,message));
+						res.send(create_res.sendError(400,null,message.message));
 					}
 				});
 			} else {
 				let message = {
 					message: "nickname doesn't exist",
 				};
-				res.send(create_res.sendError(500,null,message));
+				res.send(create_res.sendError(400,null,message.message));
 			}
 		})
 		.catch((err) => {
@@ -229,7 +229,7 @@ const forgotPassword = (req, res) => {
 				let message = {
 					message: "nickname doesn't exist",
 				};
-				res.send(create_res.sendSuccess(message));
+				res.send(create_res.sendError(400,null,message.message));
 			}
 		})
 		.catch((err) => {
@@ -296,7 +296,7 @@ const changeAvatar = async (req, res) => {
 			let message = {
 				message: "update fail",
 			};
-			res.send(create_res.sendError(500,null,message));
+			res.send(create_res.sendError(400,null,message.message));
 		}
 	} catch (err) {
 		console.log(err);

@@ -44,7 +44,7 @@ const checkRegister = async (req, res, next ) => {
 			}
 		}
 		console.log(err.details[0].message)
-		return res.send(create_res.sendError(500,null,message))
+		return res.send(create_res.sendError(400,null,message.message))
 	}
 };
 
