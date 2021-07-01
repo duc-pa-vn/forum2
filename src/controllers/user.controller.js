@@ -45,29 +45,29 @@ const register = async (req, res) => {
 					})
 					.catch((err) => {
 						console.log(err);
-						res.send(create_res.sendError());
+						res.send(create_res.sendError(500,null,err));
 					});
 				}
 				else{
 					let message = {
 						message: "nickname existed"
 					}
-					return res.send(create_res.sendSuccess(message))
+					return res.send(create_res.sendError(500,null,message))
 				}
 			}).catch(err => {
 				console.log(err)
-				return res.send(create_res.sendError())
+				return res.send(create_res.sendError(500,null,err))
 			})
 		}
 		else{
 			let message = {
 				message: "email existed"
 			}
-			return res.send(create_res.sendSuccess(message))
+			return res.send(create_res.sendError(500,null,message))
 		}
 	}).catch(err => {
 		console.log(err)
-		return res.send(create_res.sendError())
+		return res.send(create_res.sendError(500,null,err))
 	})
 };
 
@@ -84,7 +84,7 @@ const login = (req, res) => {
 				bcrypt.compare(password, user.hash_password, (err, suc) => {
 					if (err) {
 						console.log(err);
-						return res.send(create_res.sendError());
+						return res.send(create_res.sendError(500,null,err));
 					}
 					if (suc) {
 						if (user.active === false) {
@@ -110,19 +110,19 @@ const login = (req, res) => {
 						let message = {
 							message: "wrong password",
 						};
-						res.send(create_res.sendSuccess(message));
+						res.send(create_res.sendError(500,null,message));
 					}
 				});
 			} else {
 				let message = {
 					message: "nickname doesn't exist",
 				};
-				res.send(create_res.sendSuccess(message));
+				res.send(create_res.sendError(500,null,message));
 			}
 		})
 		.catch((err) => {
 			console.log(err);
-			res.send(create_res.sendError());
+			res.send(create_res.sendError(500,null,err));
 		});
 };
 
@@ -131,7 +131,7 @@ const verifyEmail = (req, res) => {
 	jwt.verify(token, process.env.SIGN_UP_TOKEN, (err, user) => {
 		if (err) {
 			console.log(err);
-			res.send(create_res.sendError());
+			res.send(create_res.sendError(500,null,err));
 		} else {
 			User.update(
 				{ active: true },
@@ -149,7 +149,7 @@ const verifyEmail = (req, res) => {
 				})
 				.catch((err) => {
 					console.log(err);
-					res.send(create_res.sendError());
+					res.send(create_res.sendError(500,null,err));
 				});
 		}
 	});
@@ -160,7 +160,7 @@ const checkRecoverToken = (req, res) => {
 	jwt.verify(token, process.env.RECOVER_TOKEN, (err, user) => {
 		if (err) {
 			console.log(err);
-			res.send(create_res.sendError());
+			res.send(create_res.sendError(500,null,err));
 		} else {
 			let message = {
 				nickname: user.nickname,
@@ -234,7 +234,7 @@ const forgotPassword = (req, res) => {
 		})
 		.catch((err) => {
 			console.log(err);
-			res.send(create_res.sendError());
+			res.send(create_res.sendError(500,null,err));
 		});
 };
 
@@ -247,7 +247,7 @@ const recoverPassword = async (req, res) => {
 		var nickname = req.body.nickname;
 	} catch (err) {
 		console.log(err);
-		res.send(create_res.sendError());
+		res.send(create_res.sendError(500,null,err));
 	}
 
 	User.update(
@@ -266,7 +266,7 @@ const recoverPassword = async (req, res) => {
 		})
 		.catch((err) => {
 			console.log(err);
-			res.send(create_res.sendError());
+			res.send(create_res.sendError(500,null,err));
 		});
 };
 
@@ -293,11 +293,14 @@ const changeAvatar = async (req, res) => {
 			};
 			res.send(create_res.sendSuccess(message));
 		} else {
-			res.send(create_res.sendError());
+			let message = {
+				message: "update fail",
+			};
+			res.send(create_res.sendError(500,null,message));
 		}
 	} catch (err) {
 		console.log(err);
-		return;
+		return res.send(create_res.sendError(500,null,err));
 	}
 };
 
