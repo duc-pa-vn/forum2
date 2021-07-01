@@ -15,7 +15,7 @@ const register = async (req, res) => {
 		10
 	);
 	// console.log(hash_password);
-	var user = {
+	var user_item = {
 		full_name: req.body.full_name,
 		email: req.body.email,
 		hash_password,
@@ -23,18 +23,52 @@ const register = async (req, res) => {
 		active: false,
 		avatar: null,
 	};
-	User.create(user)
-		.then((user) => {
-			getVerifyEmail(user.nickname, user.email, "signup");
+	User.findOne({
+		where: {
+			email: req.body.email
+		}
+	}).then(user => {
+		if(!user){
+			User.findOne({
+				where: {
+					nickname: req.body.nickname
+				}
+			}).then(user => {
+				if(!user) {
+					User.create(user_item)
+					.then((user) => {
+						getVerifyEmail(user.nickname, user.email, "signup");
+						let message = {
+							message: "add successfully. An email sent. Verify email to active",
+						};
+						res.send(create_res.sendSuccess(message));
+					})
+					.catch((err) => {
+						console.log(err);
+						res.send(create_res.sendError());
+					});
+				}
+				else{
+					let message = {
+						message: "nickname existed"
+					}
+					return res.send(create_res.sendSuccess(message))
+				}
+			}).catch(err => {
+				console.log(err)
+				return res.send(create_res.sendError())
+			})
+		}
+		else{
 			let message = {
-				message: "add successfully. An email sent. Verify email to active",
-			};
-			res.send(create_res.sendSuccess(message));
-		})
-		.catch((err) => {
-			console.log(err);
-			res.send(create_res.sendError());
-		});
+				message: "email existed"
+			}
+			return res.send(create_res.sendSuccess(message))
+		}
+	}).catch(err => {
+		console.log(err)
+		return res.send(create_res.sendError())
+	})
 };
 
 const login = (req, res) => {

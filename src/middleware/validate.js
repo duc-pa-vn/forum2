@@ -1,6 +1,5 @@
 const create_res = require("../common/create_res");
 const joi = require("joi");
-const User = require("../../models/user.model");
 // const { required } = require("joi");
 // const { Op } = require("sequelize");
 
@@ -14,39 +13,7 @@ const checkRegister = async (req, res, next ) => {
 	try {
 		const value = await schema.validateAsync(req.body);
 		if(value){
-			User.findOne({
-				where: {
-					email: req.body.email
-				}
-			}).then(user => {
-				if(!user){
-					User.findOne({
-						where: {
-							nickname: req.body.nickname
-						}
-					}).then(user => {
-						if(!user) next()
-						else{
-							let message = {
-								message: "nickname existed"
-							}
-							return res.send(create_res.sendSuccess(message))
-						}
-					}).catch(err => {
-						console.log(err)
-						return res.send(create_res.sendError())
-					})
-				}
-				else{
-					let message = {
-						message: "email existed"
-					}
-					return res.send(create_res.sendSuccess(message))
-				}
-			}).catch(err => {
-				console.log(err)
-				return res.send(create_res.sendError())
-			})
+			next()
 		}
 	}
 	catch (err) {
@@ -77,7 +44,7 @@ const checkRegister = async (req, res, next ) => {
 			}
 		}
 		console.log(err.details[0].message)
-		res.send(create_res.sendSuccess(message))
+		return res.send(create_res.sendSuccess(message))
 	}
 };
 
