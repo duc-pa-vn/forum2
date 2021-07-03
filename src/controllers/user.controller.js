@@ -41,10 +41,12 @@ const register = async (req, res) => {
 						let message = {
 							message: "add successfully. An email sent. Verify email to active",
 						};
+						res.status(200)
 						res.send(create_res.sendSuccess(message));
 					})
 					.catch((err) => {
 						console.log(err);
+						res.status(500)
 						res.send(create_res.sendError(500,null,err));
 					});
 				}
@@ -52,10 +54,12 @@ const register = async (req, res) => {
 					let message = {
 						message: "nickname existed"
 					}
+					res.status(400)
 					return res.send(create_res.sendError(400,null,message.message))
 				}
 			}).catch(err => {
 				console.log(err)
+				res.status(500)
 				return res.send(create_res.sendError(500,null,err))
 			})
 		}
@@ -63,20 +67,23 @@ const register = async (req, res) => {
 			let message = {
 				message: "email existed"
 			}
+			res.status(400)
 			return res.send(create_res.sendError(400,null,message.message))
 		}
 	}).catch(err => {
 		console.log(err)
+		res.status(500)
 		return res.send(create_res.sendError(500,null,err))
 	})
 };
 
 const login = (req, res) => {
-	var nickname = req.body.nickname.toString();
+	console.log(req.body)
+	var email = req.body.email.toString();
 	var password = req.body.password.toString();
 	User.findOne({
 		where: {
-			nickname,
+			email,
 		},
 	})
 		.then((user) => {
@@ -84,6 +91,7 @@ const login = (req, res) => {
 				bcrypt.compare(password, user.hash_password, (err, suc) => {
 					if (err) {
 						console.log(err);
+						res.status(500)
 						return res.send(create_res.sendError(500,null,err));
 					}
 					if (suc) {
@@ -93,35 +101,40 @@ const login = (req, res) => {
 								message: "An email sent. Active your account",
 							};
 							// message = JSON.stringify(message);
+							res.status(200)
 							res.send(create_res.sendSuccess(message));
 						} else {
 							// let refresh_token = jwt.sign({nickname}, process.env.REFRESH_TOKEN, {expiresIn: '20h'});
 							let token = jwt.sign(
-								{ nickname, avatar: user.avatar },
+								{ email, avatar: user.avatar },
 								process.env.LOGIN_TOKEN,
 								{ expiresIn: "17h" }
 							);
 							token = {
 								token,
 							};
+							res.status(200)
 							res.send(create_res.sendSuccess(token));
 						}
 					} else {
 						let message = {
 							message: "wrong password",
 						};
+						res.status(400)
 						res.send(create_res.sendError(400,null,message.message));
 					}
 				});
 			} else {
 				let message = {
-					message: "nickname doesn't exist",
+					message: "email doesn't exist",
 				};
+				res.status(400)
 				res.send(create_res.sendError(400,null,message.message));
 			}
 		})
 		.catch((err) => {
 			console.log(err);
+			res,status(500)
 			res.send(create_res.sendError(500,null,err));
 		});
 };
@@ -131,6 +144,7 @@ const verifyEmail = (req, res) => {
 	jwt.verify(token, process.env.SIGN_UP_TOKEN, (err, user) => {
 		if (err) {
 			console.log(err);
+			res.status(500)
 			res.send(create_res.sendError(500,null,err));
 		} else {
 			User.update(
@@ -145,10 +159,12 @@ const verifyEmail = (req, res) => {
 					let message = {
 						message: "active",
 					};
+					res.status(200)
 					res.send(create_res.sendSuccess(message));
 				})
 				.catch((err) => {
 					console.log(err);
+					res.status(500)
 					res.send(create_res.sendError(500,null,err));
 				});
 		}
@@ -160,12 +176,14 @@ const checkRecoverToken = (req, res) => {
 	jwt.verify(token, process.env.RECOVER_TOKEN, (err, user) => {
 		if (err) {
 			console.log(err);
+			res.status(500)
 			res.send(create_res.sendError(500,null,err));
 		} else {
 			let message = {
 				nickname: user.nickname,
 				message: "redirect to recover page",
 			};
+			res.status(200)
 			res.send(create_res.sendSuccess(message));
 		}
 	});
@@ -224,16 +242,19 @@ const forgotPassword = (req, res) => {
 				let message = {
 					message: "a link to recover your password sent.",
 				};
+				res.status(200)
 				res.send(create_res.sendSuccess(message));
 			} else {
 				let message = {
 					message: "nickname doesn't exist",
 				};
+				res.status(400)
 				res.send(create_res.sendError(400,null,message.message));
 			}
 		})
 		.catch((err) => {
 			console.log(err);
+			res.status(500)
 			res.send(create_res.sendError(500,null,err));
 		});
 };
@@ -247,6 +268,7 @@ const recoverPassword = async (req, res) => {
 		var nickname = req.body.nickname;
 	} catch (err) {
 		console.log(err);
+		res.status(500)
 		res.send(create_res.sendError(500,null,err));
 	}
 
@@ -262,10 +284,12 @@ const recoverPassword = async (req, res) => {
 			let message = {
 				message: "recover successfully",
 			};
+			res.status(200)
 			res.send(create_res.sendSuccess(message));
 		})
 		.catch((err) => {
 			console.log(err);
+			res.status(500)
 			res.send(create_res.sendError(500,null,err));
 		});
 };
@@ -291,15 +315,18 @@ const changeAvatar = async (req, res) => {
 			let message = {
 				message: "avatar was updated",
 			};
+			res.status(200)
 			res.send(create_res.sendSuccess(message));
 		} else {
 			let message = {
 				message: "update fail",
 			};
+			res.status(400)
 			res.send(create_res.sendError(400,null,message.message));
 		}
 	} catch (err) {
 		console.log(err);
+		res.status(500)
 		return res.send(create_res.sendError(500,null,err));
 	}
 };
