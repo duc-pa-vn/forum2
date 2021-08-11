@@ -1,4 +1,4 @@
-const User = require("../../models/user.model");
+const User  = require("../models/users.model");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
@@ -9,7 +9,7 @@ const uploadS = require("../services/upload");
 require("dotenv").config();
 
 const register = async (req, res) => {
-	// console.log(req.body.password);
+	console.log(req.body);
 	var hash_password = await bcrypt.hash(
 		req.body.password.toString().trim(),
 		10
@@ -20,24 +20,20 @@ const register = async (req, res) => {
 		email: req.body.email,
 		hash_password,
 		nickname: req.body.nickname,
-		active: false,
+		active: req.body.active,
 		avatar: null,
 	};
 	User.findOne({
-		where: {
-			email: req.body.email
-		}
+		email: req.body.email
 	}).then(user => {
-		if(!user){
+		if(user == null){
 			User.findOne({
-				where: {
-					nickname: req.body.nickname
-				}
+				nickname: req.body.nickname
 			}).then(user => {
 				if(!user) {
 					User.create(user_item)
 					.then((user) => {
-						getVerifyEmail(user.nickname, user.email, "signup");
+						// getVerifyEmail(user.nickname, user.email, "signup");
 						let message = {
 							message: "add successfully. An email sent. Verify email to active",
 						};
@@ -65,8 +61,9 @@ const register = async (req, res) => {
 		}
 		else{
 			let message = {
-				message: "email existed"
+				message: "email existed",
 			}
+			// console.log(user)
 			res.status(400)
 			return res.send(create_res.sendError(400,null,message.message))
 		}
@@ -331,6 +328,26 @@ const changeAvatar = async (req, res) => {
 	}
 };
 
+const getTest = (req, res) => {
+	User.find({})
+		.then( user => {
+			res.send(user)
+		})
+		.catch( err => {
+			console.log(err)
+			res.send(err)
+		})
+}
+
+const delUser = (req, res) => {
+	// console.log(req)
+	User.deleteOne({
+		nickname: req.body.nickname
+	})
+	.then( () => res.send({message:'ok'}))
+	.catch( err => res.send(err))
+}
+
 module.exports = {
 	register,
 	login,
@@ -340,4 +357,6 @@ module.exports = {
 	checkRecoverToken,
 	recoverPassword,
 	changeAvatar,
+	getTest,
+	delUser
 };

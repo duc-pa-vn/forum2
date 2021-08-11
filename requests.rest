@@ -1,0 +1,34 @@
+GET http://localhost:6969
+
+###
+
+POST http://localhost:6969/user/register
+Content-Type: application/json
+
+{
+    "email": "dsfc@gmail.com",
+    "full_name": "ioiu",
+    "nickname": "qdvm",
+    "password": "wefsdfadsf"
+}
+
+###
+
+POST http://localhost:6969/user/login
+
+Content-Type: application/json
+
+{
+    "email": "",
+    "password":""
+}
+
+###
+
+POST   http://localhost:6969/user/delTest
+
+Content-Type: application/json
+
+{
+    "nickname": "dfe"
+}

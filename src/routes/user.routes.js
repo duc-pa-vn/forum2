@@ -19,7 +19,8 @@ Router.get("/changeAvatar", (req, res) => {
 
 Router.post("/login", userCtrl.login);
 
-Router.post("/register", validate.checkRegister, userCtrl.register);
+// Router.post("/register", validate.checkRegister, userCtrl.register);
+Router.post("/register", userCtrl.register);
 
 // Router.post('/register', upload.single('avatar'), userCtrl.register);
 
@@ -38,6 +39,9 @@ Router.post(
 // Router.post('/changeAvatar', upload.single('avatar'), userCtrl.changeAvatar)
 Router.post("/changeAvatar", userCtrl.changeAvatar);
 
+Router.get("/getTest", userCtrl.getTest)
+
+Router.post("/delTest", userCtrl.delUser)
 // Router.get('/logout', userCtrl.logout);
 
 // Router.post("/test", upload.single("avatar"), async (req, res) => {
